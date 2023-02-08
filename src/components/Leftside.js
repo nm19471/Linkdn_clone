@@ -37,6 +37,7 @@ const Leftside=(props)=>{
          <Item>
             <span>
                 <img src="/images/item-icon.svg" alt=""/>
+                My Items
             </span>
          </Item>
         </ArtCard>

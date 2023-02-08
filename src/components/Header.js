@@ -1,8 +1,12 @@
 import styled from "styled-components";
-import { useSelector } from "react-redux";
-import { getUserAuth } from "../store/user";
+import { getUserAuth , logoutUser } from "../store/user";
+import { useDispatch , useSelector } from "react-redux";
 const Header=(props)=>{
     const user = useSelector(getUserAuth());
+    const dispatch = useDispatch();
+    const signOutUser=()=>{
+          dispatch(logoutUser());
+    }
     return(
            <Container>
             <Content>
@@ -62,8 +66,8 @@ const Header=(props)=>{
                                 <span>Me</span>
                                 <img src="/images/down-icon.svg" alt=""/>
                             </a>
-                            <SignOut>
-                                <a>Sign in</a>
+                            <SignOut onClick={signOutUser}>
+                                Sign Out
                             </SignOut>
                         </User>
                         <Work>

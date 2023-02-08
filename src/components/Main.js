@@ -1,31 +1,38 @@
 import styled from "styled-components";
+import { useState } from "react";
+import { getUserAuth } from "../store/user";
+import { useSelector } from "react-redux";
 const Main=(props)=>{
+      const user= useSelector(getUserAuth());
+      const random= 8;
+      const [con,setcon]=useState(false);
+      const rand=5;
     return (
            <Container>
-           <ShareBox>Share
+           <ShareBox>
            <div>
-            <img src="/images/user.svg" alt="" />
+            <img src={user?.photoURL || "/images/User.png"} alt="" />
             <button>Start a post</button>
            </div>
 
            <div>
              <button>
-                  <img src="/images/photo-icon.png" alt=""/>
+                  <img src="/images/photo-icon.svg" alt=""/>
                   <span>Photo</span>
              </button>
 
              <button>
-                  <img src="/images/video-icon.png" alt=""/>
+                  <img src="/images/event-icon.svg" alt=""/>
                   <span>Video</span>
              </button>
 
              <button>
-                  <img src="/images/event-icon.png" alt=""/>
+                  <img src="/images/video-icon.svg" alt=""/>
                   <span>Event</span>
              </button>
 
              <button>
-                  <img src="/images/photo-icon.png" alt=""/>
+                  <img src="/images/article-icon.svg" alt=""/>
                   <span>Write article</span>
              </button>
            </div>
@@ -56,18 +63,19 @@ const Main=(props)=>{
                   <SocialCounts>
                         <li>
                               <button>
-                                    <img src="images/like-icon.png" alt=""/>
-                                    <img src="images/clap-icon.png" alt=""/>
-                                    <span>62</span>
+                                    <img src="https://static-exp1.licdn.com/sc/h/d310t2g24pvdy4pt1jkedo4yb" alt=""/>
+                                    <img src="https://static-exp1.licdn.com/sc/h/5thsbmikm6a8uov24ygwd914f" alt=""/>
+                                    <span>{con?rand+1:rand}</span>
                               </button>
                         </li>
+                        <span>⬤</span>
                         <li>
-                              <a>Comments</a>
+                              <a>{random} Comments</a>
                         </li>
                   </SocialCounts>
 
                   <SocialActions>
-                                    <button>
+                                    <button onClick={()=>setcon(!con)} style={{backgroundColor:con?"rgba(0,0,0,0.09)":"white"}}>
                                     <i class="far fa-thumbs-up"></i>
                                         <span>Like</span>
                                     </button>
@@ -110,10 +118,14 @@ const ShareBox=styled(CommonCard)`
       color: #958b7b;
       margin: 0 0 8px 0;
       background: white;
+      padding-left: 15px;
+      padding-right: 15px;
+      padding-top: 17px;
 
       div{
             button{
                   outline: none;
+                  /* padding: 15px; */
                   color: rgba(0,0,0,0.6);
                   font-size: 14px;
                   line-height: 1.5;
@@ -257,12 +269,20 @@ const SocialCounts=styled.ul`
             display: flex;
             border: none;
             background: #fff;
+
+            span{
+                  padding-left: 5px;
+            }
         }
     }
 
     img {
         width: 18px;
     }
+    & > span {
+    font-size: 8px;
+    margin: 0 8px;
+  }
 `;
 
 const SocialActions = styled.div`
