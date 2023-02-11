@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { getUserAuth } from "../store/user";
 const Leftside=(props)=>{
     const user=useSelector(getUserAuth());
+    console.log(user);
     const getDisplayName=()=>{
         let displayName=user?.displayName.split(" ")[0];
         displayName=displayName || "there";

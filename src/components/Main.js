@@ -2,8 +2,10 @@ import styled from "styled-components";
 import { useState } from "react";
 import { getUserAuth } from "../store/user";
 import { useSelector } from "react-redux";
+import PostModal from "./PostModal";
 const Main=(props)=>{
       const user= useSelector(getUserAuth());
+      const [isPostVisible,setPostVisible]=useState(false);
       const random= 8;
       const [con,setcon]=useState(false);
       const rand=5;
@@ -12,7 +14,7 @@ const Main=(props)=>{
            <ShareBox>
            <div>
             <img src={user?.photoURL || "/images/User.png"} alt="" />
-            <button>Start a post</button>
+            <button onClick={()=>setPostVisible(true)}>Start a post</button>
            </div>
 
            <div>
@@ -76,24 +78,25 @@ const Main=(props)=>{
 
                   <SocialActions>
                                     <button onClick={()=>setcon(!con)} style={{backgroundColor:con?"rgba(0,0,0,0.09)":"white"}}>
-                                    <i class="far fa-thumbs-up"></i>
+                                    <i className="far fa-thumbs-up"></i>
                                         <span>Like</span>
                                     </button>
                                     <button>
-                                        <i class="far fa-comment"></i>
+                                        <i className="far fa-comment"></i>
                                         <span>Comment</span>
                                     </button>
                                     <button>
-                                        <i class="fas fa-share"></i>
+                                        <i className="fas fa-share"></i>
                                         <span>Share</span>
                                     </button>
                                     <button>
-                                        <i class="fab fa-telegram-plane"></i>
+                                        <i className="fab fa-telegram-plane"></i>
                                         <span>Send</span>
                                     </button>
                   </SocialActions>
             </Article>
            </div>
+           {isPostVisible && <PostModal onExit={()=>setPostVisible(false)}/>}
     </Container>
     );
 }

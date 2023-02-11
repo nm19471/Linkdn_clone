@@ -63,8 +63,9 @@ const Header=(props)=>{
                         <User>
                             <a>
                                 <img src={user?.photoURL || "/images/user.svg" } alt=""/>
-                                <span>Me</span>
+                                <span>Me
                                 <img src="/images/down-icon.svg" alt=""/>
+                                </span>
                             </a>
                             <SignOut onClick={signOutUser}>
                                 Sign Out
