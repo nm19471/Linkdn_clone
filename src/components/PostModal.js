@@ -2,14 +2,83 @@ import styled from "styled-components";
 import { getUserAuth } from "../store/user";
 import { useSelector } from "react-redux";
 import { useState } from "react";
+import ReactPlayer from "react-player";
+import { serverTimestamp } from "firebase/firestore";
+
+import { addDoc} from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage, postsRef } from "../firebase";
 
 const PostModal=({onExit})=>{
     const user= useSelector(getUserAuth());
     const [text,setText]=useState("");
+    const [Image,setImage]=useState("");
+    const [vedioLink,setvedioLink]=useState("");
+    const [assetArea,setassetArea]=useState("");
+
+    const handleImage=(e)=>{
+        const image=e.target.files[0];
+
+        if(image==="" || image===undefined){
+            alert("Please choose correct file format");
+        }
+        setImage(image);
+    }
 
     const handleReset=()=>{
         setText("");
+        setImage("");
+        setvedioLink("");
     }
+
+    const handleAsset=(area)=>{
+        setImage("");
+        setvedioLink("");
+        setassetArea(area);
+    }
+
+    const handlePost=(post)=>{
+      if(!assetArea && !text){
+        return;
+      }
+      const postBody = {
+        avatarURL: user.photoURL,
+        author: user.displayName,
+        info: "Lindkedin Member",
+        date: new Date().toDateString(),
+        timestamp: serverTimestamp(),
+        description: text,
+        media: {},
+      };
+
+      if(!assetArea){
+        addDoc(postsRef,postBody);
+      }
+      else if(vedioLink){
+           postBody.media.videoURL=vedioLink;
+           addDoc(postsRef,postBody);
+      }
+      else if (Image) {
+        console.log(Image);
+        const storageRef = ref(storage,`images/${Image.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, Image);
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {},
+          (err) => alert(err.message),
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref)
+              .then((result) => {
+                postBody.media.imageURL = result;
+                addDoc(postsRef, postBody);
+              })
+              .catch((err) => alert(err.message));
+          }
+        );
+      }
+      onExit();
+    }
+
     return (
         <Container>
             <Content>
@@ -33,7 +102,8 @@ const PostModal=({onExit})=>{
                          placeholder="What do you want to talk about?"
                         
                         />
-{/* 
+                       
+                       { assetArea ==="image" ? (
                         <UploadImage>
                             <input 
                               type="file"
@@ -41,28 +111,36 @@ const PostModal=({onExit})=>{
                               name="image"
                               id="file"
                               style={{display:"none"}}
+                              onChange={handleImage}
                             />
+                           
+                            {Image && <img src={URL.createObjectURL(Image)}/>}
                         </UploadImage>
-
+                       ):( assetArea==="vedio" &&
                         <UploadVedio>
                             <input
                              id="vedio"
                              type="text"
                              placeholder="Embed a video link"
+                             value={vedioLink}
+                             onChange={(e)=>{setvedioLink(e.currentTarget.value)}}
                             />
-                        </UploadVedio> */}
+
+                            {vedioLink && <ReactPlayer width="100%" url={vedioLink} onError={()=>setvedioLink("")}/>}
+                        </UploadVedio>
+                       )}
                     </Editor>
                 </SharedContent>
 
                 <SharedCreation>
                     <AttachAssets>
-                        <AssetButton>
+                        <AssetButton onClick={()=>handleAsset("image")}>
                             <label htmlFor="file">
                                 <img src="/images/share-image.svg"/>
                             </label>
                         </AssetButton>
                         
-                        <AssetButton>
+                        <AssetButton onClick={()=>handleAsset("vedio")}>
                             <label htmlFor="video">
                                 <img src="/images/share-video.svg"/>
                             </label>
@@ -78,7 +156,7 @@ const PostModal=({onExit})=>{
 
                     <ButtonGroup>
                         <ResetButton onClick={handleReset}>Reset</ResetButton>
-                        <PostButton>Post</PostButton>
+                        <PostButton disabled={!text && !Image && !vedioLink ? true:false} onClick={handlePost}>Post</PostButton>
                     </ButtonGroup>
                 </SharedCreation>
             </Content>
@@ -100,7 +178,7 @@ const Container = styled.div`
 const Content = styled.div`
      width: 100%;
      max-width: 550px;
-     height: 350px;
+     height: auto;
      background-color: #fff;
      max-height: 90%;
      overflow: initial;
@@ -110,6 +188,7 @@ const Content = styled.div`
      flex-direction: column;
      top: 30px;
      margin: 0 auto;
+     
 
      @media screen and (max-width: 540px) { 
         top: 0;
@@ -146,6 +225,7 @@ const SharedContent=styled.div`
       overflow-y: auto;
       vertical-align: baseline;
       background: transparent;
+      
 `;
 const UserInfo=styled.div`
       display: flex;
@@ -177,7 +257,7 @@ const Editor =styled.div`
         border: none;
         outline: none;
       }
-
+      
       input{
         width: 100%;
         height: 35px;
@@ -186,14 +266,21 @@ const Editor =styled.div`
       }
 `;
 
-// const UploadImage =styled.div`
-//       text-align: center;
-//       img {
-//         width: 100%;
-//       }
-// `;
-// const UploadVedio=styled.div`
-// `;
+const UploadImage =styled.div`
+      text-align: center;
+      
+      
+      img {
+        width: 100%;
+        
+      }
+`;
+const UploadVedio=styled.div`
+      input{
+        border: none;
+        outline: none;
+      }
+`;
 const SharedCreation=styled.div`
       display: flex;
       justify-content: space-between;
@@ -220,7 +307,7 @@ const AttachAssets=styled.div`
       padding-right: 8px;
       ${AssetButton}{
         width: 40px;
-        background-color: rgba(0,0,0,0.02);
+        background-color: white;
       }
 `;
 const ShareComment=styled.div`
@@ -228,7 +315,7 @@ const ShareComment=styled.div`
       margin-right: auto;
       border-left: 1px solid rgba(0,0,0,0.15);
       ${AssetButton}{
-        background-color: rgba(0,0,0,0.02);
+        background-color: white;
         img{
             margin-right: 5px;
 
@@ -246,14 +333,21 @@ const ResetButton=styled.button`
       height: 40px;
       border: none;
       background-color: rgba(0,0,0,0.045);
+      &:hover{
+        background-color: rgba(0,0,0,0.3);
+      }
 `;
 const PostButton=styled.button`
-      color: #fff !important;
-      background-color: #0a66c2;
+      color: ${(props)=> props.disabled ? "rgba(1,1,1,0.9)":"white"};
+      background-color: ${(props)=> props.disabled ? "rgba(0,0,0,0.09)":"#0a66c2"};
       height: 40px;
       border: none;
       padding: 0 24px;
       border-radius: 25px;
+
+      &:hover{
+        background-color: ${(props) => props.disabled ? "rgba(0,0,0,0.3)":"#004182"};
+      }
 `;
 
 export default PostModal;

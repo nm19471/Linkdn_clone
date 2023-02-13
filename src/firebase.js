@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { collection, query, orderBy } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBknc-BNmztZFzvSctB5VWxEMtdR4ixQHI",
@@ -16,6 +17,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = getFirestore();
 export const storage = getStorage(app);
 export const provider = new GoogleAuthProvider();
+
+export const postsRef = collection(db,"POST");
+export const postsQuery = query(postsRef,orderBy("timestamp","desc"));

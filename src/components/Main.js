@@ -3,12 +3,33 @@ import { useState } from "react";
 import { getUserAuth } from "../store/user";
 import { useSelector } from "react-redux";
 import PostModal from "./PostModal";
+import { useEffect } from "react";
+import { onSnapshot } from "firebase/firestore";
+import ReactPlayer from "react-player";
+import { postsQuery } from "../firebase";
 const Main=(props)=>{
       const user= useSelector(getUserAuth());
       const [isPostVisible,setPostVisible]=useState(false);
       const random= 8;
       const [con,setcon]=useState(false);
       const rand=5;
+
+      const [posts,setpost]=useState([]);
+
+      useEffect(()=>{
+            const unsubscribe=onSnapshot(postsQuery,(snapshot)=>{
+                  let arr=[];
+                  snapshot.docs.map((doc)=>
+                        arr.push({id: doc.id,...doc.data()})
+                        );
+                  setpost(arr);
+            });
+
+            return () =>{
+                  unsubscribe();
+            };
+      },[]);
+     console.log(posts)
     return (
            <Container>
            <ShareBox>
@@ -18,50 +39,59 @@ const Main=(props)=>{
            </div>
 
            <div>
-             <button>
-                  <img src="/images/photo-icon.svg" alt=""/>
+             <button onClick={()=>setPostVisible(true)}>
+                  <img src="/images/photo-icon.svg" alt="" />
                   <span>Photo</span>
              </button>
 
-             <button>
+             <button onClick={()=>setPostVisible(true)}>
                   <img src="/images/event-icon.svg" alt=""/>
                   <span>Video</span>
              </button>
 
-             <button>
+             <button onClick={()=>setPostVisible(true)}>
                   <img src="/images/video-icon.svg" alt=""/>
                   <span>Event</span>
              </button>
 
-             <button>
+             <button onClick={()=>setPostVisible(true)}>
                   <img src="/images/article-icon.svg" alt=""/>
                   <span>Write article</span>
              </button>
            </div>
            </ShareBox>
            <div>
-            <Article>
+            {   posts.map((post)=>(
+                  <Article>
                   <SharedActor>
                         <a>
-                              <img src="/images/user.svg" alt=""/>
+                              <img src={post.avatarURL || "/images/user.svg" } alt={post.author || "user"}/>
                               <div>
-                                    <span>Title</span>
-                                    <span>Info</span>
-                                    <span>Date</span>
+                              <span>{post.author}</span>
+                              <span>{post.info}</span>
+                              <span>{post.date}</span>
                               </div>
                         </a>
                         <button>
-                              <img src="images/ellipsis.png" alt=""/>
+                        <img src="/images/ellipses.svg" alt="" />
                         </button>
                   </SharedActor>
                   <Description>
-                        Description
+                        {post.description}
                   </Description>
+                  { post.media.imageURL && (
                   <SharedImg>
                         <a>
-                              <img src="/images/code.png" alt=""/>
+                              <img src={post.media.imageURL} alt={post.author || "user"}/>
                         </a>
-                  </SharedImg>
+                  </SharedImg>)
+                  }
+
+               {post.media.videoURL && (
+                 <SharedVideo>
+                  <ReactPlayer width="100%" url={post.media.videoURL} />
+                 </SharedVideo>
+                 )}
                   <SocialCounts>
                         <li>
                               <button>
@@ -95,6 +125,7 @@ const Main=(props)=>{
                                     </button>
                   </SocialActions>
             </Article>
+            ))}
            </div>
            {isPostVisible && <PostModal onExit={()=>setPostVisible(false)}/>}
     </Container>
@@ -200,6 +231,7 @@ const SharedActor=styled.div`
             img{
                 width: 48px;
                 height: 48px;
+                border-radius: 20px;
             }
             &>div{
                   display: flex;
@@ -310,5 +342,17 @@ const SocialActions = styled.div`
             }
         }
     }
+`;
+
+const SharedVideo = styled.div`
+  background-color: #f9fafb;
+  display: block;
+  margin-top: 8px;
+  position: relative;
+  width: 100%;
+
+  iframe {
+    width: 100%;
+  }
 `;
 export default Main;

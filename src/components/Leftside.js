@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import {Link} from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getUserAuth } from "../store/user";
 const Leftside=(props)=>{
@@ -21,9 +20,6 @@ const Leftside=(props)=>{
                   alt={user?.displayName || "user"}
                />
                <PhotoLink>Welcome, {getDisplayName()}</PhotoLink>
-            </a>
-            <a>
-                <AddPhotoText>Add a photo</AddPhotoText>
             </a>
          </UserInfo>
          <Widget>           
@@ -87,7 +83,7 @@ const UserInfo = styled.div`
    word-break: break-word;
    `;
 const CardBackground = styled.div`
-      background: url("/images/card-bg.svg");
+      background: url("/images/background.jpg");
       background-position: center;
       background-size: 462px;
       height: 54px;
@@ -112,13 +108,7 @@ const PhotoLink=styled.div`
       color: rgba(0,0,0,0.9);
       font-weight: 600;
 `;
-const AddPhotoText=styled.div`
-    color: #0a66c2;
-    margin-top: 4px;
-    font-size: 12px;
-    line-height: 1.33;
-    font-weight: 400;
-`;
+
 
 const Widget=styled.div`
       border-bottom: 1px solid rgba(0,0,0,0.15);

@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { connect } from 'react-redux';
 import { authUser } from "../store/user";
 import { auth } from "../firebase";
 import { useDispatch } from "react-redux";
@@ -12,8 +11,7 @@ import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 
 
-// https://github.com/cleversamerr/LinkedIn/blob/main/src/components/Hero.jsx
-
+// https://github.com/cleversamerr/LinkedIn 
 
 
 
