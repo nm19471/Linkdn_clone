@@ -44,10 +44,13 @@ const PostModal=({onExit})=>{
       const postBody = {
         avatarURL: user.photoURL,
         author: user.displayName,
+        email: user.email,
         info: "Lindkedin Member",
         date: new Date().toDateString(),
         timestamp: serverTimestamp(),
         description: text,
+        likes: [],
+        comments: [],
         media: {},
       };
 
@@ -78,7 +81,7 @@ const PostModal=({onExit})=>{
       }
       onExit();
     }
-
+    // console.log(user)
     return (
         <Container>
             <Content>
@@ -349,5 +352,6 @@ const PostButton=styled.button`
         background-color: ${(props) => props.disabled ? "rgba(0,0,0,0.3)":"#004182"};
       }
 `;
+
 
 export default PostModal;

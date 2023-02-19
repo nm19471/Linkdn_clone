@@ -4,23 +4,26 @@ import { getUserAuth } from "../store/user";
 import { useSelector } from "react-redux";
 import PostModal from "./PostModal";
 import { useEffect } from "react";
-import { onSnapshot } from "firebase/firestore";
+import { onSnapshot, updateDoc ,doc ,deleteDoc } from "firebase/firestore";
 import ReactPlayer from "react-player";
-import { postsQuery } from "../firebase";
+import { postsQuery, postsRef } from "../firebase";
+import Comment from "./Comment";
 const Main=(props)=>{
       const user= useSelector(getUserAuth());
       const [isPostVisible,setPostVisible]=useState(false);
-      const random= 8;
-      const [con,setcon]=useState(false);
-      const rand=5;
 
       const [posts,setpost]=useState([]);
+      
+      const [showComment,setShowComment]=useState([]);
+      const [editpost,setEditpost]=useState(false);
+      
+      
 
       useEffect(()=>{
             const unsubscribe=onSnapshot(postsQuery,(snapshot)=>{
                   let arr=[];
                   snapshot.docs.map((doc)=>
-                        arr.push({id: doc.id,...doc.data()})
+                        arr.push({...doc.data(),postID: doc.id})
                         );
                   setpost(arr);
             });
@@ -29,7 +32,28 @@ const Main=(props)=>{
                   unsubscribe();
             };
       },[]);
-     console.log(posts)
+
+      const fetchlikes=(likes,postid)=>{
+            updateDoc(doc(postsRef,postid),{
+                  likes: likes.some((l)=>l.email === user.email)
+                  ? likes.filter((l)=>l.email !== user.email)
+                  : [
+                      { name: user.displayName , email: user.email, photo: user.photoURL},
+                      ...likes,
+                  ],
+            })
+      }
+      
+      const setComments=(postid)=>{            
+            setShowComment((prev)=> [postid,...prev]);
+      }
+      
+      
+      const deletepost=(postid)=>{
+            deleteDoc(doc(postsRef,postid));
+      }
+
+      // console.log(posts)
     return (
            <Container>
            <ShareBox>
@@ -72,9 +96,28 @@ const Main=(props)=>{
                               <span>{post.date}</span>
                               </div>
                         </a>
-                        <button>
-                        <img src="/images/ellipses.svg" alt="" />
+                        <button onClick={()=>setEditpost((prev)=>(prev===post.postID) ? false: post.postID)}>
+                         <img src="../images/ellipses.svg" alt="" />
                         </button>
+
+                        { editpost === post.postID && (
+                        
+                  <EditModel>
+                              <li>
+                                    <img src="../images/firebase.png" alt="saved"/>
+                                    <div className="info">
+                                    <h6>Save</h6>
+                                    <span>Save for later</span>
+                                    </div>
+                              </li>
+                              { post.email === user.email && (
+                              <li onClick={()=>{deletepost(post.postID)}}>
+                                    <img src="../images/delete.svg" alt=""/>
+                                    <h6>Delete post</h6>
+                              </li>
+                              )}
+                        </EditModel>
+                       )}
                   </SharedActor>
                   <Description>
                         {post.description}
@@ -97,21 +140,33 @@ const Main=(props)=>{
                               <button>
                                     <img src="https://static-exp1.licdn.com/sc/h/d310t2g24pvdy4pt1jkedo4yb" alt=""/>
                                     <img src="https://static-exp1.licdn.com/sc/h/5thsbmikm6a8uov24ygwd914f" alt=""/>
-                                    <span>{con?rand+1:rand}</span>
+                                    <span>{post.likes.length}</span>
                               </button>
                         </li>
                         <span>⬤</span>
-                        <li>
-                              <a>{random} Comments</a>
+                        <li onClick={()=>showComment.includes(post.postID) ? setShowComment(showComment.filter((id)=>id!==post.postID)):setComments(post.postID)}>
+                              <a>{post.comments ? post.comments.length : 0} Comments</a>
                         </li>
+                        
                   </SocialCounts>
 
                   <SocialActions>
-                                    <button onClick={()=>setcon(!con)} style={{backgroundColor:con?"rgba(0,0,0,0.09)":"white"}}>
-                                    <i className="far fa-thumbs-up"></i>
-                                        <span>Like</span>
+                                    <button 
+                                    className={
+                                          post.likes.some((l)=> l.email === user.email) ? "active":""
+                                    }
+                                    onClick={()=>{
+                                          fetchlikes(post.likes,post.postID);
+                                    }}>
+                                    <img className="unLiked" src="../images/like.svg" alt="like" />
+                                    <img
+                                    className="liked"
+                                    src="https://static-exp1.licdn.com/sc/h/5zhd32fqi5pxwzsz78iui643e"
+                                    alt="like"
+                                    />
+                                    <span>Like</span>
                                     </button>
-                                    <button>
+                                    <button onClick={()=>showComment.includes(post.postID) ? setShowComment(showComment.filter((id)=>id!==post.postID)):setComments(post.postID)}>
                                         <i className="far fa-comment"></i>
                                         <span>Comment</span>
                                     </button>
@@ -124,6 +179,8 @@ const Main=(props)=>{
                                         <span>Send</span>
                                     </button>
                   </SocialActions>
+                  {showComment.includes(post.postID) && (<Comment photo={user.photoURL} comments={post.comments} postID={post.postID} user={user}/>)}
+
             </Article>
             ))}
            </div>
@@ -220,6 +277,7 @@ const SharedActor=styled.div`
       margin-bottom: 8px;
       align-items: center;
       display: flex;
+      position: relative;
 
       a{
             margin-right: 12px;
@@ -257,13 +315,14 @@ const SharedActor=styled.div`
       }
 
       button{
-            position: absolute;
-            right: 12px;
-            top: 0;
             background: transparent;
             border: none;
-            outline: none;
-      }
+            outline: none; 
+            img{
+            width: 1.5rem;
+            height: fit-content;
+          }
+      } 
 `;
 
 const Description=styled.div`
@@ -334,8 +393,26 @@ const SocialActions = styled.div`
         padding: 8px;
         color: #0a66c2;
         border: none;
+        cursor: pointer;
         background-color: #fff;
-
+        .liked {
+         display: none;
+         }
+        .unLiked {
+          display: inline-block;
+         }
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.08);
+    }
+    &.active {
+      color: #0a66c2;
+      .liked {
+        display: inline-block;
+      }
+      .unLiked {
+        display: none;
+      }
+    }
         @media (min-width: 768px) {
             span {
                 margin-left: 8px;
@@ -355,4 +432,55 @@ const SharedVideo = styled.div`
     width: 100%;
   }
 `;
+
+const EditModel=styled.ul`
+   animation: fadeIn 0.5s;
+  text-align: start;
+  position: absolute;
+  right: 5px;
+  top: 55px;
+   
+   background-color: white;
+   box-shadow: 0 0 0 1px rgb(0 0 0 / 15%), 0 6px 9px rgb(0 0 0 / 20%);
+   border-radius: 8px;
+   overflow: hidden;
+   z-index: 99;
+   width: 30%;
+
+
+    li{
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.3s;
+      &:hover{
+            background-color: rgba(0,0,0,0.08);
+      }
+
+      img{
+            width: 18px;
+            height: 20px;
+      }
+      h6{
+            font-size: 14px;
+            color: rgba(0,0,0,1);
+            font-weight: 600;
+      }
+
+      .info {
+      text-align: start;
+      span {
+        font-size: 12px;
+        display: block;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+    }     
+`;
+
+
+
+
 export default Main;
