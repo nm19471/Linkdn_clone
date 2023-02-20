@@ -44,7 +44,7 @@ const Login=()=>{
                 </a>
                 <div>
                     <Join>Join now</Join>
-                    <SignIn>Sign in</SignIn>
+                    <SignIn onClick={handleSignIn}>Sign in</SignIn>
                 </div>
             </Nav>
             
