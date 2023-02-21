@@ -36,7 +36,7 @@ const Header=(props)=>{
                         <NavList>
                             <a>
                                 <img src="/images/nav-network.svg" alt=""/>
-                                <span>My Networks</span>
+                                <span>Networks</span>
                             </a>
                         </NavList>
 
@@ -200,7 +200,7 @@ const NavList=styled.li`
      }
       
      @media(max-width: 768px){
-        min-width: 70px;
+        min-width: 55px;
      }
     }
 
@@ -226,6 +226,11 @@ const SignOut=styled.div`
     transition-duration: 167ms;
     text-align: center;
     display: none;
+    @media(max-width: 768px){
+        position: fixed;
+        right: 10%;
+        top: 88%;
+     }
 `;
 
 const User=styled(NavList )`

@@ -173,9 +173,12 @@ img{
 `;
 const Form =styled.div`
      margin: 100px;
-     width: 408px;
+     width: 500px;
+     /* height: 100px; */
      @media (max-width: 768px){
         margin-top: 20px;
+        /* height: 500px; */
+        
      }
 `;
 const Google=styled.button`
@@ -183,9 +186,9 @@ const Google=styled.button`
    justify-content: center;
    background-color: #fff;
    align-items: center;
-   height: 56px;
+   height: 70px;
    width: 100%;
-   border-radius: 28px;
+   border-radius: 35px;
    
    vertical-align: middle;
    z-index: 0;
@@ -196,6 +199,12 @@ const Google=styled.button`
        background-color: rgba(207,207,207,0.25);
        color: rgba(0,0,0,0.75);
    }
+
+   @media (max-width: 768px){
+        /* margin-top: 20px; */
+        /* height: 500px; */
+        width: 120%;
+     }
 `;
 
 export default Login;
