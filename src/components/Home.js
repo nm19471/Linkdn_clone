@@ -6,8 +6,7 @@ const Home=(props)=>{
       return (
         <Container>
           <Section>
-            <h5><a>Hiring in a hurry ? </a></h5>
-            <p>Find talented pros in record time with Upwork and keep business moving.</p>
+          <h5><a>Hiring in a hurry ?</a> <p>Find talented pros in record time with Upwork and keep business moving.</p></h5>
           </Section>
           <Layout>
            <Leftside/>
@@ -21,14 +20,9 @@ const Container=styled.div`
      padding-top: 52px;
      max-width: 100%;     
  `;
-const Content=styled.div`
-      max-width: 1128px;
-      margin-left: auto;
-      margin-right: auto;
-`;
 const Section=styled.section`
     min-height: 50px;
-    padding: 16px 0;
+    padding-top: 16px;
     box-sizing: content-box;
     text-align: center;
     text-decoration: underline;
@@ -50,7 +44,8 @@ const Section=styled.section`
 
     @media(max-width: 768px){
       flex-direction: column;
-      padding: 0 5px;
+      padding: 10px 5px;
+
     }
 `;
 
@@ -61,7 +56,7 @@ const Layout=styled.div`
     column-gap: 25px;
     row-gap: 25px;
     grid-template-rows: auto;
-    margin: 25px 0;
+    /* margin: 5px 0; */
     @media(max-width: 768px){
           display: flex;
           flex-direction: column;

@@ -1,8 +1,10 @@
 import styled from "styled-components";
 import { getUserAuth , logoutUser } from "../store/user";
 import { useDispatch , useSelector } from "react-redux";
+import { useState } from "react";
 const Header=(props)=>{
     const user = useSelector(getUserAuth());
+    const [signout,setSignout]=useState(false);
     const dispatch = useDispatch();
     const signOutUser=()=>{
           dispatch(logoutUser());
@@ -61,15 +63,15 @@ const Header=(props)=>{
                             </a>
                         </NavList>
                         <User>
-                            <a>
+                            <a onClick={()=>signout?setSignout(false):setSignout(true)}>
                                 <img src={user?.photoURL || "/images/user.svg" } alt=""/>
                                 <span>Me
                                 <img src="/images/down-icon.svg" alt=""/>
                                 </span>
                             </a>
-                            <SignOut onClick={signOutUser}>
+                            { signout && <SignOut onClick={signOutUser}>
                                 Sign Out
-                            </SignOut>
+                            </SignOut>}
                         </User>
                         <Work>
                         <a>
@@ -155,6 +157,7 @@ const Nav=styled.div`
         bottom: 0;
         background: white;
         width: 100%;
+        overflow: scroll;
    }
 `;
 
@@ -200,7 +203,7 @@ const NavList=styled.li`
      }
       
      @media(max-width: 768px){
-        min-width: 55px;
+        min-width: 70px;
      }
     }
 
